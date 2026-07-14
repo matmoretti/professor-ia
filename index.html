@@ -70,7 +70,6 @@
     display: grid;
     align-content: center;
     padding: 120px clamp(20px, 4vw, 48px) 60px;
-    overflow: hidden;
   }
   #particles { position: absolute; inset: 0; z-index: 0; }
   .hero > * { position: relative; z-index: 1; }
@@ -112,16 +111,32 @@
   .cta.ghost:hover { border-color: var(--green); color: var(--green); background: transparent; }
   .cta:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
 
-  /* terminal card no hero */
-  .term-card {
+  /* terminal card no hero: janela flutuante e arrastável */
+  .term-float {
     width: min(430px, 100%);
+    position: relative;
+    z-index: 10;
+    will-change: transform;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .term-card {
     border-radius: 14px;
     background: color-mix(in srgb, var(--bg-raise) 65%, transparent);
     backdrop-filter: blur(18px);
     border: 1px solid var(--line);
     box-shadow: 0 30px 80px rgba(0,0,0,.5);
+    animation: float 5.5s ease-in-out infinite;
+    transition: box-shadow .3s;
   }
-  .term-bar { display: flex; gap: 6px; padding: 13px 16px; border-bottom: 1px solid var(--line); }
+  .term-float.dragging .term-card { box-shadow: 0 45px 110px rgba(0,0,0,.65); border-color: var(--ink-faint); animation-play-state: paused; }
+  .term-bar {
+    display: flex; gap: 6px; padding: 13px 16px; border-bottom: 1px solid var(--line);
+    cursor: grab; touch-action: none; user-select: none;
+  }
+  .term-float.dragging .term-bar { cursor: grabbing; }
   .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--ink-faint); }
   .term-body {
     font-family: var(--mono); font-size: 13.5px; line-height: 1.75;
@@ -239,6 +254,7 @@
     .reveal { transition: none; opacity: 1; transform: none; }
     .marquee-track { animation: none; }
     .term-body .cursor { animation: none; }
+    .term-card { animation: none; }
   }
 </style>
 </head>
@@ -269,9 +285,11 @@
         <a class="cta ghost" href="aulas/aula-01.html">Ver a Aula 1 →</a>
       </div>
     </div>
-    <div class="term-card" aria-hidden="true">
-      <div class="term-bar"><i></i><i></i><i></i></div>
-      <div class="term-body" id="termDemo"></div>
+    <div class="term-float" id="termFloat" aria-hidden="true">
+      <div class="term-card">
+        <div class="term-bar" id="termBar"><i></i><i></i><i></i></div>
+        <div class="term-body" id="termDemo"></div>
+      </div>
     </div>
   </div>
 </header>
@@ -452,6 +470,30 @@
       return '<div class="' + l.cls + '">' + l.text + "</div>";
     }).join("");
   } else { typeLoop(); }
+
+  // janela do terminal: arrastável pela barra de título
+  var tFloat = document.getElementById("termFloat");
+  var tBar = document.getElementById("termBar");
+  if (tFloat && tBar) {
+    var tx = 0, ty = 0, sx = 0, sy = 0, dragging = false;
+    tBar.addEventListener("pointerdown", function (e) {
+      dragging = true;
+      sx = e.clientX - tx;
+      sy = e.clientY - ty;
+      tFloat.classList.add("dragging");
+      tBar.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    tBar.addEventListener("pointermove", function (e) {
+      if (!dragging) return;
+      tx = e.clientX - sx;
+      ty = e.clientY - sy;
+      tFloat.style.transform = "translate(" + tx + "px, " + ty + "px)";
+    });
+    function endDrag() { dragging = false; tFloat.classList.remove("dragging"); }
+    tBar.addEventListener("pointerup", endDrag);
+    tBar.addEventListener("pointercancel", endDrag);
+  }
 
   // partículas: glifos de terminal flutuando
   var canvas = document.getElementById("particles");
