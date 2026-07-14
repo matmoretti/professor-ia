@@ -211,17 +211,6 @@
   @media (max-width: 720px) { .mod { grid-template-columns: 44px 1fr; } .mod .d { grid-column: 2; } }
   .mod.demand .t { color: var(--ink-dim); }
 
-  /* trilha 0: grade sob demanda (sem sequência, sem números) */
-  .grid0 { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
-  .card0 {
-    border: 1px dashed var(--line); border-radius: 14px;
-    padding: 22px 20px; display: grid; gap: 8px; align-content: start;
-    transition: border-color .3s, transform .35s cubic-bezier(.22,1,.36,1);
-  }
-  .card0:hover { border-color: var(--green); transform: translateY(-4px); }
-  .card0 .t { font-weight: 700; font-size: 17px; text-transform: uppercase; letter-spacing: 0.01em; }
-  .card0 .d { color: var(--ink-dim); font-size: 14.5px; }
-
   /* ---------- projeto final ---------- */
   .final-band {
     background: var(--green); color: var(--bg);
@@ -306,17 +295,17 @@
     <span class="sec-index">Trilha 0</span>
     <div>
       <h2 class="split">Fundamentos</h2>
-      <p class="sec-desc reveal">Pré-requisitos ensinados <em>sob demanda</em>: cada um entra na primeira vez que aparece nas outras trilhas, do básico ao avançado. Sem ordem fixa, por isso sem números.</p>
+      <p class="sec-desc reveal">Pré-requisitos ensinados <em>sob demanda</em>: cada um entra na primeira vez que aparece nas outras trilhas, do básico ao avançado.</p>
     </div>
   </div>
-  <div class="grid0">
-    <div class="card0 reveal"><span class="t">Markdown</span><span class="d">Títulos e listas → frontmatter, tabelas, a "língua nativa" dos LLMs</span></div>
-    <div class="card0 reveal"><span class="t">Terminal, shell e CLI</span><span class="d">O balcão, o atendente e o cardápio. E por que o Claude Code é um CLI</span></div>
-    <div class="card0 reveal"><span class="t">Formatos de dados</span><span class="d">JSON, YAML e como se descreve uma ferramenta pra um LLM</span></div>
-    <div class="card0 reveal"><span class="t">Git</span><span class="d">O "histórico de versões" do mundo do código</span></div>
-    <div class="card0 reveal"><span class="t">APIs e HTTP</span><span class="d">Como programas conversam entre si pela internet</span></div>
-    <div class="card0 reveal"><span class="t">Arquivos e sistema</span><span class="d">Pastas, arquivos ocultos, extensões e executáveis</span></div>
-  </div>
+  <ol class="mods">
+    <li class="mod demand reveal"><span class="t">Markdown</span><span class="d">Títulos e listas → frontmatter, tabelas, a "língua nativa" dos LLMs</span></li>
+    <li class="mod demand reveal"><span class="t">Terminal, shell e CLI</span><span class="d">O balcão, o atendente e o cardápio. E por que o Claude Code é um CLI</span></li>
+    <li class="mod demand reveal"><span class="t">Formatos de dados</span><span class="d">JSON, YAML e como se descreve uma ferramenta pra um LLM</span></li>
+    <li class="mod demand reveal"><span class="t">Git</span><span class="d">O "histórico de versões" do mundo do código</span></li>
+    <li class="mod demand reveal"><span class="t">APIs e HTTP</span><span class="d">Como programas conversam entre si pela internet</span></li>
+    <li class="mod demand reveal"><span class="t">Arquivos e sistema</span><span class="d">Pastas, arquivos ocultos, extensões e executáveis</span></li>
+  </ol>
 </section>
 
 <section>
