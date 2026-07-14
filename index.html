@@ -31,6 +31,7 @@
     font-size: 17px;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
   }
   ::selection { background: var(--green); color: var(--bg); }
 
@@ -79,7 +80,7 @@
     font-weight: 860;
     font-stretch: 115%;
     text-transform: uppercase;
-    font-size: clamp(44px, 9.5vw, 128px);
+    font-size: clamp(38px, 9.5vw, 128px);
     line-height: 0.94;
     letter-spacing: -0.015em;
   }
@@ -148,6 +149,10 @@
   /* ---------- sections ---------- */
   section { padding: clamp(80px, 12vh, 140px) clamp(20px, 4vw, 48px); max-width: 1200px; margin: 0 auto; }
   .sec-head { display: grid; grid-template-columns: auto 1fr; gap: clamp(20px, 4vw, 60px); align-items: baseline; margin-bottom: clamp(36px, 6vh, 64px); }
+  @media (max-width: 640px) {
+    .sec-head { grid-template-columns: 1fr; gap: 16px; }
+    .sec-index { justify-self: start; }
+  }
   .sec-index {
     font-family: var(--mono); font-size: 13px; color: var(--green);
     border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; white-space: nowrap;
