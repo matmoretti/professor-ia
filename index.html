@@ -133,15 +133,43 @@
   }
   .term-float.dragging .term-card { box-shadow: 0 45px 110px rgba(0,0,0,.65); border-color: var(--ink-faint); animation-play-state: paused; }
   .term-bar {
-    display: flex; gap: 6px; padding: 13px 16px; border-bottom: 1px solid var(--line);
+    display: flex; gap: 6px; align-items: center; padding: 13px 16px; border-bottom: 1px solid var(--line);
     cursor: grab; touch-action: none; user-select: none;
   }
   .term-float.dragging .term-bar { cursor: grabbing; }
+  .term-title {
+    margin-left: 10px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
+    color: var(--ink-faint); text-transform: uppercase;
+  }
+  .drag-hint {
+    position: absolute; top: -13px; right: 20px; z-index: 2;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    background: var(--green); color: var(--bg); font-weight: 700;
+    padding: 5px 13px; border-radius: 999px;
+    animation: hintbob 2.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes hintbob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  @media (min-width: 1100px) {
+    .term-float { width: 480px; margin-top: -170px; }
+    .term-tilt { transform: rotate(-2.5deg); }
+    .term-float.dragging .term-tilt { transform: rotate(-1deg); }
+    .term-tilt { transition: transform .4s cubic-bezier(.22,1,.36,1); }
+  }
+  .in-line { display: flex; align-items: baseline; }
+  .term-input {
+    flex: 1; min-width: 40px;
+    background: none; border: none; outline: none; padding: 0;
+    color: var(--ink); font: inherit; caret-color: var(--green);
+  }
   .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--ink-faint); }
   .term-body {
-    font-family: var(--mono); font-size: 13.5px; line-height: 1.75;
-    padding: 18px 20px 22px; min-height: 172px; color: var(--ink-dim);
+    font-family: var(--mono); font-size: 14px; line-height: 1.75;
+    padding: 18px 20px 22px; min-height: 186px; max-height: 300px; overflow-y: auto;
+    color: var(--ink-dim); cursor: text;
   }
+  .term-body a { color: var(--green); }
   .term-body .u { color: var(--ink); }
   .term-body .g { color: var(--green); }
   .term-body .cursor { display: inline-block; width: 8px; height: 1.1em; background: var(--green); vertical-align: text-bottom; animation: blink 1s steps(1) infinite; }
@@ -255,6 +283,7 @@
     .marquee-track { animation: none; }
     .term-body .cursor { animation: none; }
     .term-card { animation: none; }
+    .drag-hint { animation: none; }
   }
 </style>
 </head>
@@ -285,10 +314,13 @@
         <a class="cta ghost" href="aulas/aula-01.html">Ver a Aula 1 →</a>
       </div>
     </div>
-    <div class="term-float" id="termFloat" aria-hidden="true">
-      <div class="term-card">
-        <div class="term-bar" id="termBar"><i></i><i></i><i></i></div>
-        <div class="term-body" id="termDemo"></div>
+    <div class="term-float" id="termFloat" role="group" aria-label="Terminal de demonstração interativo">
+      <span class="drag-hint" id="dragHint">✥ arraste-me</span>
+      <div class="term-tilt">
+        <div class="term-card">
+          <div class="term-bar" id="termBar"><i></i><i></i><i></i><span class="term-title">claude · demo interativa</span></div>
+          <div class="term-body" id="termDemo"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -432,20 +464,38 @@
   var mq = document.getElementById("marquee");
   mq.innerHTML += mq.innerHTML;
 
-  // terminal do hero: conversa que se digita sozinha
+  // terminal do hero: demo que digita sozinha e vira prompt interativo ao clique
   var term = document.getElementById("termDemo");
   var script = [
     { cls: "u", text: "> me explica o que é um LLM?", pause: 700 },
     { cls: "", text: "Claro! Pensa num autocompletar gigante…", pause: 900 },
     { cls: "u", text: "> cria um arquivo de exemplo pra eu ver", pause: 700 },
     { cls: "g", text: "⏺ Write(exemplo.txt) ✓", pause: 900 },
-    { cls: "", text: "Pronto! Vai lá conferir. Aula é isso. 🎓", pause: 2600 }
+    { cls: "", text: "Pronto! Vai lá conferir. Aula é isso. 🎓", pause: 1400 },
+    { cls: "g", text: "clique aqui e experimente você mesmo", pause: 2400 }
   ];
+  var interactive = false;
+  var timers = [];
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+  function stopAuto() { timers.forEach(clearTimeout); timers = []; }
+  function scrollTerm() { term.scrollTop = term.scrollHeight; }
+  function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+  function addLine(cls, html) {
+    var el = document.createElement("div");
+    if (cls) el.className = cls;
+    el.innerHTML = html;
+    term.appendChild(el);
+    scrollTerm();
+    return el;
+  }
+
   function typeLoop() {
+    if (interactive) return;
     term.innerHTML = "";
     var li = 0;
     function nextLine() {
-      if (li >= script.length) { setTimeout(typeLoop, 400); return; }
+      if (interactive) return;
+      if (li >= script.length) { later(typeLoop, 400); return; }
       var line = script[li++];
       var el = document.createElement("div");
       if (line.cls) el.className = line.cls;
@@ -455,29 +505,95 @@
       el.appendChild(cur);
       var ci = 0;
       (function typeChar() {
+        if (interactive) return;
         if (ci < line.text.length) {
           cur.insertAdjacentText("beforebegin", line.text.charAt(ci++));
-          setTimeout(typeChar, 26 + Math.random() * 34);
+          later(typeChar, 26 + Math.random() * 34);
         } else {
-          setTimeout(function () { cur.remove(); nextLine(); }, line.pause);
+          later(function () { cur.remove(); nextLine(); }, line.pause);
         }
       })();
     }
     nextLine();
   }
+
+  function promptLine() {
+    var el = document.createElement("div");
+    el.className = "in-line";
+    el.innerHTML = '<span class="g">&gt;&nbsp;</span>';
+    var inp = document.createElement("input");
+    inp.className = "term-input";
+    inp.setAttribute("aria-label", "Digite um comando");
+    inp.setAttribute("autocomplete", "off");
+    inp.setAttribute("autocapitalize", "none");
+    inp.setAttribute("spellcheck", "false");
+    el.appendChild(inp);
+    term.appendChild(el);
+    scrollTerm();
+    inp.focus({ preventScroll: true });
+    inp.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter") return;
+      var v = inp.value.trim();
+      el.remove();
+      if (v) addLine("u", "&gt; " + esc(v));
+      respond(v.toLowerCase());
+    });
+  }
+
+  function respond(cmd) {
+    if (!cmd) { promptLine(); return; }
+    if (/limpar|clear|cls/.test(cmd)) { term.innerHTML = ""; promptLine(); return; }
+    var out;
+    if (/ajuda|help|\?/.test(cmd)) {
+      out = 'comandos: <span class="g">aula</span>, <span class="g">instalar</span>, <span class="g">quem</span>, <span class="g">limpar</span>. Ou tenta a sorte com outra coisa.';
+    } else if (/aula|demo|exemplo|come[cç]/.test(cmd)) {
+      out = 'aula de exemplo: <a href="aulas/aula-01.html">aula-01, o autocompletar gigante</a>';
+    } else if (/instalar|matricul|baixar|download/.test(cmd)) {
+      out = 'copie <span class="g">skill/</span> para <span class="g">~/.claude/skills/professor-ia/</span> e diga "bora estudar". <a href="https://github.com/matmoretti/professor-ia#como-instalar">guia completo</a>';
+    } else if (/quem|claude|voc[eê]|professor/.test(cmd)) {
+      out = 'sou o Claude, o professor deste curso. Cérebro (LLM) + mãos (ferramentas) = agente. No curso de verdade, eu ajo no seu computador. 🎓';
+    } else if (/^(oi|ol[aá]|eae|opa|fala|hello|hi)\b/.test(cmd) || /^(oi|ol[aá])/.test(cmd)) {
+      out = 'oi! digite <span class="g">ajuda</span> pra ver o que eu sei fazer aqui.';
+    } else if (/llm|agente|ia\b/.test(cmd)) {
+      out = 'boa pergunta! É exatamente isso que o curso ensina: <a href="aulas/aula-01.html">começa pela aula 1</a>.';
+    } else {
+      out = 'comando não encontrado (sou uma demo, não o Claude inteiro). Tenta <span class="g">ajuda</span>.';
+    }
+    later(function () { addLine("", out); promptLine(); }, 220);
+  }
+
+  function goInteractive() {
+    if (interactive) return;
+    interactive = true;
+    killHint();
+    stopAuto();
+    term.innerHTML = "";
+    addLine("g", "Claude Code · demo interativa");
+    addLine("", 'digite <span class="g">ajuda</span> e aperte Enter');
+    promptLine();
+  }
+  term.addEventListener("click", function (e) {
+    if (e.target.closest("a")) return;
+    if (!interactive) { goInteractive(); }
+    else { var last = term.querySelector(".term-input"); if (last) last.focus({ preventScroll: true }); }
+  });
+
   if (reduced) {
-    term.innerHTML = script.map(function (l) {
+    term.innerHTML = script.slice(0, 5).map(function (l) {
       return '<div class="' + l.cls + '">' + l.text + "</div>";
-    }).join("");
+    }).join("") + '<div class="g">clique aqui e experimente você mesmo</div>';
   } else { typeLoop(); }
 
   // janela do terminal: arrastável pela barra de título
   var tFloat = document.getElementById("termFloat");
   var tBar = document.getElementById("termBar");
+  var hint = document.getElementById("dragHint");
+  function killHint() { if (hint) { hint.remove(); hint = null; } }
   if (tFloat && tBar) {
     var tx = 0, ty = 0, sx = 0, sy = 0, dragging = false;
     tBar.addEventListener("pointerdown", function (e) {
       dragging = true;
+      killHint();
       sx = e.clientX - tx;
       sy = e.clientY - ty;
       tFloat.classList.add("dragging");
