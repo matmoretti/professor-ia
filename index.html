@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Professor IA — Aprenda Claude Code com o próprio Claude</title>
-<meta name="description" content="Curso open source: o Claude como seu professor particular de Claude Code e arquitetura de IA — do zero absoluto até construir seu próprio agente.">
+<title>Professor IA: aprenda Claude Code com o próprio Claude</title>
+<meta name="description" content="Curso open source: o Claude como seu professor particular de Claude Code e arquitetura de IA, do zero absoluto até construir seu próprio agente.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -211,6 +211,17 @@
   @media (max-width: 720px) { .mod { grid-template-columns: 44px 1fr; } .mod .d { grid-column: 2; } }
   .mod.demand .t { color: var(--ink-dim); }
 
+  /* trilha 0: grade sob demanda (sem sequência, sem números) */
+  .grid0 { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+  .card0 {
+    border: 1px dashed var(--line); border-radius: 14px;
+    padding: 22px 20px; display: grid; gap: 8px; align-content: start;
+    transition: border-color .3s, transform .35s cubic-bezier(.22,1,.36,1);
+  }
+  .card0:hover { border-color: var(--green); transform: translateY(-4px); }
+  .card0 .t { font-weight: 700; font-size: 17px; text-transform: uppercase; letter-spacing: 0.01em; }
+  .card0 .d { color: var(--ink-dim); font-size: 14.5px; }
+
   /* ---------- projeto final ---------- */
   .final-band {
     background: var(--green); color: var(--bg);
@@ -248,14 +259,14 @@
   <a class="brand" href="#"><em>~/</em>professor-ia</a>
   <div class="links">
     <a href="#curriculo" class="hide-sm">Currículo</a>
-    <a href="aulas/aula-01.html" class="hide-sm">Aula demo</a>
+    <a href="aulas/aula-01.html" class="hide-sm">Aula 1</a>
     <a href="https://github.com/matmoretti/professor-ia">GitHub ↗</a>
   </div>
 </nav>
 
 <header class="hero">
   <canvas id="particles" aria-hidden="true"></canvas>
-  <p class="label">Curso open source · grátis · em português</p>
+  <p class="label">Curso open source, grátis, em português</p>
   <h1 aria-label="Aprenda Claude Code com o próprio Claude.">
     <span class="line" aria-hidden="true"><span>Aprenda</span></span>
     <span class="line" aria-hidden="true"><span>Claude Code</span></span>
@@ -263,10 +274,10 @@
   </h1>
   <div class="hero-foot">
     <div>
-      <p class="hero-sub">Uma skill que transforma o Claude no seu <strong>professor particular</strong> de Claude Code e arquitetura de IA. Do zero absoluto — <strong>feito para quem nunca programou.</strong></p>
+      <p class="hero-sub">O Claude como seu <strong>professor particular</strong> de Claude Code e arquitetura de IA. <strong>Feito para quem nunca programou.</strong></p>
       <div class="cta-row" style="margin-top: 30px">
         <a class="cta" href="https://github.com/matmoretti/professor-ia#como-instalar">Instalar o professor</a>
-        <a class="cta ghost" href="aulas/aula-01.html">Ver a aula 1 →</a>
+        <a class="cta ghost" href="aulas/aula-01.html">Ver a Aula 1 →</a>
       </div>
     </div>
     <div class="term-card" aria-hidden="true">
@@ -295,17 +306,17 @@
     <span class="sec-index">Trilha 0</span>
     <div>
       <h2 class="split">Fundamentos</h2>
-      <p class="sec-desc reveal">Pré-requisitos ensinados <em>sob demanda</em> — cada um entra na primeira vez que aparece nas outras trilhas, do básico ao avançado.</p>
+      <p class="sec-desc reveal">Pré-requisitos ensinados <em>sob demanda</em>: cada um entra na primeira vez que aparece nas outras trilhas, do básico ao avançado. Sem ordem fixa, por isso sem números.</p>
     </div>
   </div>
-  <ol class="mods">
-    <li class="mod demand reveal"><span class="t">Markdown</span><span class="d">Títulos e listas → frontmatter, tabelas, a "língua nativa" dos LLMs</span></li>
-    <li class="mod demand reveal"><span class="t">Terminal, shell e CLI</span><span class="d">O balcão, o atendente e o cardápio — e por que o Claude Code é um CLI</span></li>
-    <li class="mod demand reveal"><span class="t">Formatos de dados</span><span class="d">JSON, YAML e como se descreve uma ferramenta pra um LLM</span></li>
-    <li class="mod demand reveal"><span class="t">Git</span><span class="d">O "histórico de versões" do mundo do código</span></li>
-    <li class="mod demand reveal"><span class="t">APIs e HTTP</span><span class="d">Como programas conversam entre si pela internet</span></li>
-    <li class="mod demand reveal"><span class="t">Arquivos e sistema</span><span class="d">Pastas, arquivos ocultos, extensões e executáveis</span></li>
-  </ol>
+  <div class="grid0">
+    <div class="card0 reveal"><span class="t">Markdown</span><span class="d">Títulos e listas → frontmatter, tabelas, a "língua nativa" dos LLMs</span></div>
+    <div class="card0 reveal"><span class="t">Terminal, shell e CLI</span><span class="d">O balcão, o atendente e o cardápio. E por que o Claude Code é um CLI</span></div>
+    <div class="card0 reveal"><span class="t">Formatos de dados</span><span class="d">JSON, YAML e como se descreve uma ferramenta pra um LLM</span></div>
+    <div class="card0 reveal"><span class="t">Git</span><span class="d">O "histórico de versões" do mundo do código</span></div>
+    <div class="card0 reveal"><span class="t">APIs e HTTP</span><span class="d">Como programas conversam entre si pela internet</span></div>
+    <div class="card0 reveal"><span class="t">Arquivos e sistema</span><span class="d">Pastas, arquivos ocultos, extensões e executáveis</span></div>
+  </div>
 </section>
 
 <section>
@@ -317,13 +328,13 @@
     </div>
   </div>
   <ol class="mods">
-    <li class="mod reveal"><span class="t">Fundamentos do Claude Code</span><span class="d">O ciclo do agente, permissões, primeiros comandos — <a href="aulas/aula-01.html">veja a aula de exemplo</a></span></li>
+    <li class="mod reveal"><span class="t">Fundamentos do Claude Code</span><span class="d">O ciclo do agente, permissões, primeiros comandos. <a href="aulas/aula-01.html">Veja a aula de exemplo</a></span></li>
     <li class="mod reveal"><span class="t">Contexto e memória</span><span class="d">A "mesa de trabalho" do LLM; CLAUDE.md; memória entre sessões</span></li>
     <li class="mod reveal"><span class="t">Ferramentas nativas</span><span class="d">As "mãos": ler, escrever, buscar, executar</span></li>
     <li class="mod reveal"><span class="t">Skills e comandos</span><span class="d">Transformar o agente em especialista (como esta skill!)</span></li>
     <li class="mod reveal"><span class="t">Hooks e configurações</span><span class="d">Regras automáticas e permissões sob medida</span></li>
     <li class="mod reveal"><span class="t">Subagentes</span><span class="d">O mestre de obras e seus ajudantes</span></li>
-    <li class="mod reveal"><span class="t">MCP</span><span class="d">Plugar o agente em outros serviços — Figma, Slack, Gmail…</span></li>
+    <li class="mod reveal"><span class="t">MCP</span><span class="d">Plugar o agente em outros serviços: Figma, Slack, Gmail…</span></li>
     <li class="mod reveal"><span class="t">Workflows e orquestração</span><span class="d">Vários agentes trabalhando em conjunto</span></li>
     <li class="mod reveal"><span class="t">Git + Claude Code</span><span class="d">Versionar, revisar e colaborar como os profissionais</span></li>
     <li class="mod reveal"><span class="t">Automação</span><span class="d">Agentes que trabalham sozinhos, em horários agendados</span></li>
@@ -335,7 +346,7 @@
     <span class="sec-index">Trilha B</span>
     <div>
       <h2 class="split">Arquitetura de IA</h2>
-      <p class="sec-desc reveal">A teoria por trás: entender o que acontece dentro da máquina — sem matemática pesada.</p>
+      <p class="sec-desc reveal">A teoria por trás: entender o que acontece dentro da máquina, sem matemática pesada.</p>
     </div>
   </div>
   <ol class="mods">
@@ -343,9 +354,9 @@
     <li class="mod reveal"><span class="t">Anatomia de um agente</span><span class="d">Cérebro + mãos + objetivo; o ciclo pensa → age → observa</span></li>
     <li class="mod reveal"><span class="t">Engenharia de contexto</span><span class="d">System prompts e a arte de instruir um LLM</span></li>
     <li class="mod reveal"><span class="t">RAG</span><span class="d">Como dar uma "biblioteca" pesquisável ao modelo</span></li>
-    <li class="mod reveal"><span class="t">Design de ferramentas</span><span class="d">Como desenhar boas "mãos" — puro design, aliás</span></li>
+    <li class="mod reveal"><span class="t">Design de ferramentas</span><span class="d">Como desenhar boas "mãos". Puro design, aliás</span></li>
     <li class="mod reveal"><span class="t">Arquiteturas multiagente</span><span class="d">Orquestradores, painéis de juízes, verificação cruzada</span></li>
-    <li class="mod reveal"><span class="t">Avaliação (evals)</span><span class="d">Como saber se a IA está boa — "parece bom" não basta</span></li>
+    <li class="mod reveal"><span class="t">Avaliação (evals)</span><span class="d">Como saber se a IA está boa: "parece bom" não basta</span></li>
     <li class="mod reveal"><span class="t">Segurança e confiabilidade</span><span class="d">Prompt injection, permissões, o humano no circuito</span></li>
     <li class="mod reveal"><span class="t">Custo e latência</span><span class="d">Escolher o modelo certo pra cada tarefa</span></li>
     <li class="mod reveal"><span class="t">Projeto final</span><span class="d">Ver abaixo ↓</span></li>
@@ -357,12 +368,12 @@
     <p class="label">Projeto final</p>
     <h2 class="split">Você sai do curso com um agente construído por você.</h2>
     <p class="reveal">O projeto é adaptado à sua profissão: um designer constrói um agente que revisa textos conforme o guide da marca; um analista, um auditor de planilhas; um advogado, um revisor de contratos. O professor desenha o desafio com você.</p>
-    <a class="cta reveal" href="https://github.com/matmoretti/professor-ia#como-instalar">Começar agora</a>
+    <a class="cta reveal" href="https://github.com/matmoretti/professor-ia#como-instalar">Instalar o professor</a>
   </div>
 </div>
 
 <footer>
-  <span>© 2026 · licença MIT · <a href="https://github.com/matmoretti/professor-ia">github.com/matmoretti/professor-ia</a></span>
+  <span>© 2026, licença MIT · <a href="https://github.com/matmoretti/professor-ia">github.com/matmoretti/professor-ia</a></span>
   <span>nascido de uma aula real entre o Claude e um product designer que nunca tinha programado 🎓</span>
 </footer>
 
@@ -421,7 +432,7 @@
     { cls: "", text: "Claro! Pensa num autocompletar gigante…", pause: 900 },
     { cls: "u", text: "> cria um arquivo de exemplo pra eu ver", pause: 700 },
     { cls: "g", text: "⏺ Write(exemplo.txt) ✓", pause: 900 },
-    { cls: "", text: "Pronto! Vai lá conferir — aula é isso. 🎓", pause: 2600 }
+    { cls: "", text: "Pronto! Vai lá conferir. Aula é isso. 🎓", pause: 2600 }
   ];
   function typeLoop() {
     term.innerHTML = "";
