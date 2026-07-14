@@ -1,0 +1,501 @@
+<title>Aula 1 — O autocompletar gigante</title>
+<style>
+  :root {
+    --bg: #F7F8F6;
+    --surface: #FFFFFF;
+    --ink: #1E2420;
+    --ink-soft: #55605A;
+    --line: #DDE3DF;
+    --accent: #0E7A4E;
+    --accent-soft: #E3F2EA;
+    --term-bg: #14201A;
+    --term-ink: #C9E8D6;
+    --term-green: #4ADE94;
+    --good: #0E7A4E;
+    --bad: #B4453A;
+    --good-soft: #E3F2EA;
+    --bad-soft: #F9E8E6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101512;
+      --surface: #18201B;
+      --ink: #E6EDE8;
+      --ink-soft: #98A69E;
+      --line: #2A342E;
+      --accent: #4ADE94;
+      --accent-soft: #1B2E24;
+      --term-bg: #0B120E;
+      --term-ink: #C9E8D6;
+      --term-green: #4ADE94;
+      --good: #4ADE94;
+      --bad: #F0938A;
+      --good-soft: #1B2E24;
+      --bad-soft: #34201D;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #101512; --surface: #18201B; --ink: #E6EDE8; --ink-soft: #98A69E;
+    --line: #2A342E; --accent: #4ADE94; --accent-soft: #1B2E24;
+    --term-bg: #0B120E; --term-ink: #C9E8D6; --term-green: #4ADE94;
+    --good: #4ADE94; --bad: #F0938A; --good-soft: #1B2E24; --bad-soft: #34201D;
+  }
+  :root[data-theme="light"] {
+    --bg: #F7F8F6; --surface: #FFFFFF; --ink: #1E2420; --ink-soft: #55605A;
+    --line: #DDE3DF; --accent: #0E7A4E; --accent-soft: #E3F2EA;
+    --term-bg: #14201A; --term-ink: #C9E8D6; --term-green: #4ADE94;
+    --good: #0E7A4E; --bad: #B4453A; --good-soft: #E3F2EA; --bad-soft: #F9E8E6;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, "Segoe UI", sans-serif;
+    line-height: 1.65;
+    font-size: 17px;
+  }
+  .wrap { max-width: 700px; margin: 0 auto; padding: 48px 24px 96px; }
+
+  .eyebrow {
+    font-family: "Cascadia Code", Consolas, ui-monospace, monospace;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1 {
+    font-family: Charter, Georgia, "Times New Roman", serif;
+    font-size: clamp(34px, 6vw, 46px);
+    line-height: 1.15;
+    margin: 10px 0 14px;
+    text-wrap: balance;
+    font-weight: 700;
+  }
+  .lede { font-size: 19px; color: var(--ink-soft); margin: 0 0 8px; text-wrap: balance; }
+
+  h2 {
+    font-family: Charter, Georgia, serif;
+    font-size: 27px;
+    line-height: 1.25;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  .step {
+    margin-top: 72px;
+    display: grid;
+    gap: 14px;
+  }
+  .step-tag {
+    display: flex; align-items: center; gap: 10px;
+    font-family: "Cascadia Code", Consolas, ui-monospace, monospace;
+    font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .step-tag::before {
+    content: attr(data-n);
+    display: inline-grid; place-items: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent); color: var(--bg);
+    font-weight: 700; letter-spacing: 0;
+  }
+  p { margin: 0; }
+  .muted { color: var(--ink-soft); }
+  strong { font-weight: 650; }
+  .term {
+    font-family: "Cascadia Code", Consolas, ui-monospace, monospace;
+    font-size: 0.88em;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 1px 7px;
+    border-radius: 5px;
+    white-space: nowrap;
+  }
+
+  /* ---------- demo autocompletar ---------- */
+  .demo {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 26px 26px 30px;
+    display: grid;
+    gap: 20px;
+  }
+  .demo-sentence {
+    font-family: Charter, Georgia, serif;
+    font-size: 25px;
+    line-height: 1.4;
+    min-height: 2.8em;
+  }
+  .demo-sentence .picked { color: var(--accent); }
+  .caret {
+    display: inline-block; width: 3px; height: 1.05em;
+    background: var(--accent); vertical-align: text-bottom;
+    margin-left: 3px;
+    animation: blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .caret { animation: none; } }
+
+  .demo-label { font-size: 13px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-soft); }
+  .options { display: grid; gap: 10px; }
+  .opt {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    font-family: "Cascadia Code", Consolas, ui-monospace, monospace;
+    font-size: 16px;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 11px 14px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .opt:hover { border-color: var(--accent); }
+  .opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .opt .bar {
+    position: absolute; inset: 0;
+    background: var(--accent-soft);
+    transform-origin: left;
+    z-index: 0;
+  }
+  .opt .w, .opt .pct { position: relative; z-index: 1; }
+  .opt .pct { color: var(--ink-soft); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .demo-done {
+    background: var(--accent-soft);
+    border-radius: 10px;
+    padding: 16px 18px;
+    display: none;
+  }
+  .demo-done.show { display: block; }
+  .reset {
+    font: inherit; font-size: 14px;
+    color: var(--accent);
+    background: none; border: none;
+    padding: 0; cursor: pointer;
+    text-decoration: underline;
+    justify-self: start;
+  }
+
+  /* ---------- comparação chat × agente ---------- */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 640px) { .compare { grid-template-columns: 1fr; } }
+  .window {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--surface);
+    display: flex; flex-direction: column;
+  }
+  .window-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 13px;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px; color: var(--ink-soft);
+  }
+  .dots { display: flex; gap: 5px; }
+  .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+  .window-body { padding: 16px; display: grid; gap: 10px; align-content: start; font-size: 15px; flex: 1; }
+  .bubble { border-radius: 10px; padding: 9px 12px; max-width: 92%; }
+  .bubble.user { background: var(--accent-soft); justify-self: end; }
+  .bubble.bot { background: var(--bg); border: 1px solid var(--line); justify-self: start; }
+  .window.terminal { background: var(--term-bg); border-color: transparent; }
+  .window.terminal .window-bar { color: #7FA38E; border-color: rgba(255,255,255,0.08); }
+  .window.terminal .window-body { font-family: "Cascadia Code", Consolas, ui-monospace, monospace; color: var(--term-ink); font-size: 14px; }
+  .window.terminal .bubble.user { background: rgba(74,222,148,0.12); color: var(--term-green); }
+  .window.terminal .bubble.bot { background: rgba(255,255,255,0.05); border: none; }
+  .toolcall {
+    color: var(--term-green);
+    font-size: 13px;
+    padding: 4px 2px;
+  }
+  .verdict { font-size: 14px; margin-top: 4px; }
+  .verdict.no { color: var(--bad); }
+  .verdict.yes { color: var(--good); }
+
+  /* ---------- fórmula ---------- */
+  .formula {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 28px 20px;
+    font-family: Charter, Georgia, serif;
+    font-size: 24px;
+  }
+  .formula .box {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 18px;
+    background: var(--bg);
+  }
+  .formula .box small { display: block; font-family: system-ui, sans-serif; font-size: 12px; color: var(--ink-soft); letter-spacing: 0.06em; text-transform: uppercase; }
+  .formula .op { color: var(--ink-soft); }
+  .formula .result { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+
+  /* ---------- quiz ---------- */
+  .quiz { display: grid; gap: 26px; }
+  .q {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px;
+    display: grid; gap: 12px;
+  }
+  .q h3 { margin: 0; font-size: 17px; font-weight: 650; line-height: 1.45; }
+  .q .alts { display: grid; gap: 8px; }
+  .alt {
+    font: inherit; font-size: 15px; text-align: left;
+    background: var(--bg); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 9px;
+    padding: 10px 13px; cursor: pointer;
+  }
+  .alt:hover { border-color: var(--accent); }
+  .alt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .alt.right { background: var(--good-soft); border-color: var(--good); }
+  .alt.wrong { background: var(--bad-soft); border-color: var(--bad); }
+  .feedback { font-size: 14.5px; display: none; }
+  .feedback.show { display: block; }
+  .feedback.ok { color: var(--good); }
+  .feedback.nope { color: var(--bad); }
+
+  /* ---------- glossário ---------- */
+  .gloss { display: grid; gap: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--surface); }
+  .gloss > div { padding: 16px 20px; display: grid; grid-template-columns: 110px 1fr; gap: 14px; align-items: baseline; }
+  .gloss > div + div { border-top: 1px solid var(--line); }
+  .gloss dt { font-family: "Cascadia Code", Consolas, ui-monospace, monospace; font-size: 14px; color: var(--accent); margin: 0; }
+  .gloss dd { margin: 0; font-size: 15px; color: var(--ink-soft); }
+  @media (max-width: 520px) { .gloss > div { grid-template-columns: 1fr; gap: 4px; } }
+
+  .homework {
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 20px;
+    display: grid; gap: 8px;
+  }
+  footer { margin-top: 80px; font-size: 13.5px; color: var(--ink-soft); border-top: 1px solid var(--line); padding-top: 18px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Curso de Claude Code &amp; IA · Aula 1</p>
+    <h1>O autocompletar gigante</h1>
+    <p class="lede">Antes de eu explicar o que é uma IA como o Claude, você vai <em>ser</em> uma por trinta segundos.</p>
+  </header>
+
+  <!-- PASSO 1 — demo -->
+  <section class="step">
+    <p class="step-tag" data-n="1">Experimente</p>
+    <h2>Complete a frase, uma palavra de cada vez</h2>
+    <p class="muted">Clique na palavra que você acha que vem a seguir. Os números mostram o quão "provável" cada palavra parece.</p>
+    <div class="demo">
+      <p class="demo-sentence"><span id="base">O gato subiu no</span><span class="picked" id="picked"></span><span class="caret" id="caret"></span></p>
+      <div>
+        <p class="demo-label" id="opt-label">Próxima palavra mais provável:</p>
+        <div class="options" id="options" role="group" aria-label="Opções de próxima palavra"></div>
+      </div>
+      <div class="demo-done" id="done">
+        <p><strong>Pronto — você acabou de fazer exatamente o que um LLM faz.</strong> Ele não "pensa a frase inteira": escolhe a próxima palavra mais provável, milhares de vezes seguidas, tão bem que o resultado parece pensamento. É simples assim — e poderoso assim.</p>
+      </div>
+      <button class="reset" id="reset" hidden>↺ Fazer de novo com outras escolhas</button>
+    </div>
+  </section>
+
+  <!-- PASSO 2 — o que é LLM -->
+  <section class="step">
+    <p class="step-tag" data-n="2">Entenda</p>
+    <h2>Isso tem nome: LLM</h2>
+    <p><span class="term">LLM</span> vem do inglês <em>Large Language Model</em> — "grande modelo de linguagem". É um programa que leu uma quantidade absurda de texto (livros, sites, conversas, código de computador) e ficou extraordinariamente bom em uma única tarefa: <strong>prever a próxima palavra</strong>, como você fez acima.</p>
+    <p>A surpresa da década: quando o "autocompletar" fica bom o suficiente, ele passa a exibir coisas que parecem raciocínio — explicar, traduzir, resumir, programar. Eu, o <strong>Claude</strong>, sou um LLM feito pela Anthropic.</p>
+    <p class="muted">Mas um LLM sozinho tem um limite importante…</p>
+  </section>
+
+  <!-- PASSO 3 — chat vs agente -->
+  <section class="step">
+    <p class="step-tag" data-n="3">Compare</p>
+    <h2>Cérebro na jarra × cérebro com mãos</h2>
+    <p>Um LLM sozinho é um <strong>cérebro numa jarra</strong>: só conversa. Peça a mesma coisa para um chat comum e para o Claude Code, e veja a diferença:</p>
+    <div class="compare">
+      <div class="window">
+        <div class="window-bar"><span class="dots"><i></i><i></i><i></i></span> Chat comum (no navegador)</div>
+        <div class="window-body">
+          <p class="bubble user">Cria um arquivo de texto na minha Área de Trabalho</p>
+          <p class="bubble bot">Eu não consigo criar arquivos no seu computador, mas aqui vai um passo a passo: 1. Clique com o botão direito na Área de Trabalho… 2. Escolha "Novo"…</p>
+          <p class="verdict no">✗ Só descreve. Quem faz é você.</p>
+        </div>
+      </div>
+      <div class="window terminal">
+        <div class="window-bar"><span class="dots"><i></i><i></i><i></i></span> Claude Code (no terminal)</div>
+        <div class="window-body">
+          <p class="bubble user">Cria um arquivo de texto na minha Área de Trabalho</p>
+          <p class="toolcall">⏺ Write(C:\Users\voce\Desktop\ola-do-claude.txt)</p>
+          <p class="bubble bot">Pronto! Criei o arquivo <strong>ola-do-claude.txt</strong> na sua Área de Trabalho. Vai lá conferir. :)</p>
+          <p class="verdict yes">✓ Fez de verdade.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PASSO 4 — fórmula -->
+  <section class="step">
+    <p class="step-tag" data-n="4">A fórmula</p>
+    <h2>A equação mais importante do curso</h2>
+    <div class="formula" aria-label="LLM mais ferramentas igual a agente">
+      <span class="box">cérebro<small>LLM</small></span>
+      <span class="op">+</span>
+      <span class="box">mãos<small>ferramentas</small></span>
+      <span class="op">=</span>
+      <span class="box result">agente</span>
+    </div>
+    <p>Uma <span class="term">ferramenta</span> é uma permissão de ação que o LLM recebe: ler um arquivo, escrever um arquivo, executar um programa. Um <span class="term">agente</span> é um LLM que recebe um objetivo e usa ferramentas, em ciclos, até cumprir. O <strong>Claude Code</strong> — este programa onde estamos conversando — é exatamente isso.</p>
+    <p class="muted">E aquela janela preta onde você digita? É o <span class="term">terminal</span>: um jeito de usar o computador por texto em vez de cliques. Você já está usando um sem perceber — na Aula 2 ele será a estrela.</p>
+  </section>
+
+  <!-- PASSO 5 — quiz -->
+  <section class="step">
+    <p class="step-tag" data-n="5">Verifique</p>
+    <h2>Três perguntas, sem nota, sem medo</h2>
+    <div class="quiz" id="quiz"></div>
+  </section>
+
+  <!-- PASSO 6 — glossário -->
+  <section class="step">
+    <p class="step-tag" data-n="6">Guarde</p>
+    <h2>Glossário da aula</h2>
+    <dl class="gloss">
+      <div><dt>LLM</dt><dd>"Grande modelo de linguagem": programa treinado para prever a próxima palavra, tão bem que parece raciocinar. O Claude é um.</dd></div>
+      <div><dt>agente</dt><dd>Um LLM com ferramentas e um objetivo: em vez de só responder, ele age até completar a tarefa.</dd></div>
+      <div><dt>ferramenta</dt><dd>Uma ação que o LLM pode executar: ler arquivo, escrever arquivo, rodar um programa.</dd></div>
+      <div><dt>terminal</dt><dd>Janela onde se usa o computador digitando texto em vez de clicando. A "casa" do Claude Code.</dd></div>
+      <div><dt>Claude Code</dt><dd>O programa que você está usando: o Claude (LLM) + ferramentas, rodando no seu terminal.</dd></div>
+    </dl>
+  </section>
+
+  <!-- dever de casa -->
+  <section class="step">
+    <p class="step-tag" data-n="7">Pratique</p>
+    <h2>Seu exercício</h2>
+    <div class="homework">
+      <p><strong>1.</strong> Volte ao Claude Code e peça, em português normal, uma ação real no seu computador. Ex.: <em>"cria uma pasta chamada Estudos na minha Área de Trabalho"</em>.</p>
+      <p><strong>2.</strong> Confira com os próprios olhos que aconteceu.</p>
+      <p><strong>3.</strong> Me conte, com suas palavras: qual a diferença entre um chat de IA e um agente?</p>
+    </div>
+  </section>
+
+  <footer>Aula 1 de muitas · Curso de Claude Code &amp; Arquitetura de IA · professor: Claude 🤝 aluno: você</footer>
+</div>
+
+<script>
+  // ---------- demo autocompletar ----------
+  var steps = [
+    { label: "Próxima palavra mais provável:", opts: [["telhado", 61], ["sofá", 24], ["muro", 12], ["liquidificador", 0.4]] },
+    { label: "E agora?", opts: [["e", 41], ["para", 28], ["atrás", 17], ["porque", 9]] },
+    { label: "Mais uma…", opts: [["ficou", 38], ["miou", 33], ["olhou", 19], ["dormiu", 8]] },
+    { label: "Última!", opts: [["preso.", 52], ["observando.", 27], ["orgulhoso.", 14], ["famoso.", 4]] }
+  ];
+  var stepIdx = 0;
+  var pickedEl = document.getElementById("picked");
+  var optionsEl = document.getElementById("options");
+  var labelEl = document.getElementById("opt-label");
+  var doneEl = document.getElementById("done");
+  var resetEl = document.getElementById("reset");
+  var caretEl = document.getElementById("caret");
+
+  function fmt(p) { return (p < 1 ? p.toFixed(1) : Math.round(p)) + "%"; }
+
+  function renderStep() {
+    optionsEl.innerHTML = "";
+    if (stepIdx >= steps.length) {
+      labelEl.textContent = "Frase completa.";
+      doneEl.classList.add("show");
+      resetEl.hidden = false;
+      caretEl.style.display = "none";
+      return;
+    }
+    labelEl.textContent = steps[stepIdx].label;
+    steps[stepIdx].opts.forEach(function (o) {
+      var b = document.createElement("button");
+      b.className = "opt";
+      b.innerHTML = '<span class="bar" style="transform:scaleX(' + (o[1] / 100) + ')"></span>' +
+                    '<span class="w">' + o[0] + '</span><span class="pct">' + fmt(o[1]) + '</span>';
+      b.addEventListener("click", function () {
+        pickedEl.textContent += " " + o[0];
+        stepIdx++;
+        renderStep();
+      });
+      optionsEl.appendChild(b);
+    });
+  }
+  resetEl.addEventListener("click", function () {
+    stepIdx = 0;
+    pickedEl.textContent = "";
+    doneEl.classList.remove("show");
+    resetEl.hidden = true;
+    caretEl.style.display = "";
+    renderStep();
+  });
+  renderStep();
+
+  // ---------- quiz ----------
+  var questions = [
+    {
+      q: "Um LLM, lá no fundo, foi treinado para fazer o quê?",
+      alts: ["Buscar respostas prontas na internet", "Prever a próxima palavra de um texto", "Copiar frases de livros"],
+      right: 1,
+      why: "Isso mesmo! Todo o resto — explicar, traduzir, programar — emerge desse superpoder de prever a próxima palavra."
+    },
+    {
+      q: "Qual a diferença entre um chat comum e o Claude Code?",
+      alts: ["O Claude Code tem ferramentas e age no seu computador", "O Claude Code é mais educado", "O chat comum não usa um LLM"],
+      right: 0,
+      why: "Exato: o cérebro pode até ser o mesmo — a diferença são as mãos (ferramentas)."
+    },
+    {
+      q: "Complete: LLM + ferramentas = …",
+      alts: ["terminal", "aplicativo", "agente"],
+      right: 2,
+      why: "É a fórmula da aula! Um agente recebe um objetivo e usa ferramentas até cumprir."
+    }
+  ];
+  var quizEl = document.getElementById("quiz");
+  questions.forEach(function (item, qi) {
+    var box = document.createElement("div");
+    box.className = "q";
+    var h = document.createElement("h3");
+    h.textContent = (qi + 1) + ". " + item.q;
+    box.appendChild(h);
+    var alts = document.createElement("div");
+    alts.className = "alts";
+    var fb = document.createElement("p");
+    fb.className = "feedback";
+    item.alts.forEach(function (text, ai) {
+      var b = document.createElement("button");
+      b.className = "alt";
+      b.textContent = text;
+      b.addEventListener("click", function () {
+        alts.querySelectorAll(".alt").forEach(function (x) { x.classList.remove("right", "wrong"); });
+        if (ai === item.right) {
+          b.classList.add("right");
+          fb.textContent = "✓ " + item.why;
+          fb.className = "feedback show ok";
+        } else {
+          b.classList.add("wrong");
+          fb.textContent = "✗ Quase — tenta outra. (Dica: relê o passo " + (qi === 0 ? "2" : qi === 1 ? "3" : "4") + ".)";
+          fb.className = "feedback show nope";
+        }
+      });
+      alts.appendChild(b);
+    });
+    box.appendChild(alts);
+    box.appendChild(fb);
+    quizEl.appendChild(box);
+  });
+</script>
