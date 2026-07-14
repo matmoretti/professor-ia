@@ -3,169 +3,488 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Professor IA — Curso de Claude Code &amp; Arquitetura de IA</title>
-<meta name="description" content="Tenha o Claude como seu professor particular de Claude Code e arquitetura de IA — do zero absoluto até construir seu próprio agente.">
+<title>Professor IA — Aprenda Claude Code com o próprio Claude</title>
+<meta name="description" content="Curso open source: o Claude como seu professor particular de Claude Code e arquitetura de IA — do zero absoluto até construir seu próprio agente.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #F7F8F6; --surface: #FFFFFF; --ink: #1E2420; --ink-soft: #55605A;
-    --line: #DDE3DF; --accent: #0E7A4E; --accent-soft: #E3F2EA;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #101512; --surface: #18201B; --ink: #E6EDE8; --ink-soft: #98A69E;
-      --line: #2A342E; --accent: #4ADE94; --accent-soft: #1B2E24;
-    }
+    --bg: #0A0D0B;
+    --bg-raise: #10140F;
+    --ink: #F2F5F0;
+    --ink-dim: #9BA69D;
+    --ink-faint: #4E5850;
+    --line: #232B24;
+    --green: #4ADE94;
+    --green-deep: #0E7A4E;
+    --sans: "Archivo", system-ui, sans-serif;
+    --mono: "JetBrains Mono", Consolas, ui-monospace, monospace;
   }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
-    margin: 0; background: var(--bg); color: var(--ink);
-    font-family: system-ui, "Segoe UI", sans-serif;
-    line-height: 1.6; font-size: 16px;
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 780px; margin: 0 auto; padding: 48px 24px 96px; }
-  .eyebrow {
-    font-family: "Cascadia Code", Consolas, ui-monospace, monospace;
-    font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+  ::selection { background: var(--green); color: var(--bg); }
+
+  .label {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--green);
   }
+  .label.dim { color: var(--ink-dim); }
+
+  /* ---------- nav ---------- */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px clamp(20px, 4vw, 48px);
+    background: color-mix(in srgb, var(--bg) 72%, transparent);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .brand { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--ink); text-decoration: none; }
+  nav .brand em { color: var(--green); font-style: normal; }
+  nav .links { display: flex; gap: 26px; align-items: center; }
+  nav .links a {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-dim); text-decoration: none; transition: color .25s;
+  }
+  nav .links a:hover { color: var(--green); }
+  @media (max-width: 620px) { nav .links a.hide-sm { display: none; } }
+
+  /* ---------- hero ---------- */
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    align-content: center;
+    padding: 120px clamp(20px, 4vw, 48px) 60px;
+    overflow: hidden;
+  }
+  #particles { position: absolute; inset: 0; z-index: 0; }
+  .hero > * { position: relative; z-index: 1; }
+  .hero .label { margin-bottom: 22px; }
   h1 {
-    font-family: Charter, Georgia, "Times New Roman", serif;
-    font-size: clamp(32px, 6vw, 44px); line-height: 1.15;
-    margin: 10px 0 12px; text-wrap: balance; font-weight: 700;
+    margin: 0;
+    font-weight: 860;
+    font-stretch: 115%;
+    text-transform: uppercase;
+    font-size: clamp(44px, 9.5vw, 128px);
+    line-height: 0.94;
+    letter-spacing: -0.015em;
   }
-  .lede { font-size: 18px; color: var(--ink-soft); margin: 0 0 24px; text-wrap: balance; }
-  .cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
+  h1 .line { display: block; overflow: hidden; }
+  h1 .line > span { display: inline-block; transform: translateY(110%); }
+  h1 .accent { color: var(--green); }
+  .loaded h1 .line > span { animation: rise .9s cubic-bezier(.22,1,.36,1) forwards; }
+  .loaded h1 .line:nth-child(2) > span { animation-delay: .1s; }
+  .loaded h1 .line:nth-child(3) > span { animation-delay: .2s; }
+  @keyframes rise { to { transform: translateY(0); } }
+
+  .hero-foot {
+    margin-top: 48px;
+    display: flex; flex-wrap: wrap; gap: 40px;
+    align-items: flex-end; justify-content: space-between;
+  }
+  .hero-sub { max-width: 420px; color: var(--ink-dim); font-size: 17px; margin: 0; }
+  .hero-sub strong { color: var(--ink); font-weight: 600; }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 14px; }
   .cta {
-    display: inline-block; text-decoration: none;
-    background: var(--accent); color: var(--bg);
-    font-weight: 650; font-size: 15px;
-    padding: 11px 20px; border-radius: 9px;
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;
+    text-decoration: none; padding: 15px 26px; border-radius: 999px;
+    background: var(--green); color: var(--bg); font-weight: 700;
+    transition: transform .3s cubic-bezier(.22,1,.36,1), background .3s;
   }
-  .cta.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
-  .cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .cta:hover { transform: translateY(-3px); background: #6BEBAC; }
+  .cta.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .cta.ghost:hover { border-color: var(--green); color: var(--green); background: transparent; }
+  .cta:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
 
-  .facts {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 36px;
+  /* terminal card no hero */
+  .term-card {
+    width: min(430px, 100%);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--bg-raise) 65%, transparent);
+    backdrop-filter: blur(18px);
+    border: 1px solid var(--line);
+    box-shadow: 0 30px 80px rgba(0,0,0,.5);
   }
-  @media (max-width: 560px) { .facts { grid-template-columns: 1fr; } }
-  .fact {
-    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
-    padding: 16px 18px;
+  .term-bar { display: flex; gap: 6px; padding: 13px 16px; border-bottom: 1px solid var(--line); }
+  .term-bar i { width: 10px; height: 10px; border-radius: 50%; background: var(--ink-faint); }
+  .term-body {
+    font-family: var(--mono); font-size: 13.5px; line-height: 1.75;
+    padding: 18px 20px 22px; min-height: 172px; color: var(--ink-dim);
   }
-  .fact b { display: block; font-size: 24px; font-family: Charter, Georgia, serif; }
-  .fact span { font-size: 13px; color: var(--ink-soft); letter-spacing: 0.05em; text-transform: uppercase; }
+  .term-body .u { color: var(--ink); }
+  .term-body .g { color: var(--green); }
+  .term-body .cursor { display: inline-block; width: 8px; height: 1.1em; background: var(--green); vertical-align: text-bottom; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
 
-  section { margin-top: 56px; }
-  .trilha-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
-  h2 { font-family: Charter, Georgia, serif; font-size: 25px; margin: 0; text-wrap: balance; }
-  .trilha-tag {
-    font-family: "Cascadia Code", Consolas, ui-monospace, monospace;
-    font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--accent); background: var(--accent-soft); border-radius: 5px; padding: 2px 8px;
+  /* ---------- marquee ---------- */
+  .marquee {
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    overflow: hidden; white-space: nowrap; padding: 16px 0;
+    background: var(--bg-raise);
   }
-  .trilha-desc { color: var(--ink-soft); font-size: 15px; margin: 0 0 18px; }
-  ol.mods { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; counter-reset: mod; }
+  .marquee-track { display: inline-block; animation: scroll 36s linear infinite; }
+  .marquee span {
+    font-family: var(--mono); font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-dim); padding: 0 28px;
+  }
+  .marquee span::after { content: "·"; color: var(--green); margin-left: 56px; }
+  @keyframes scroll { to { transform: translateX(-50%); } }
+
+  /* ---------- sections ---------- */
+  section { padding: clamp(80px, 12vh, 140px) clamp(20px, 4vw, 48px); max-width: 1200px; margin: 0 auto; }
+  .sec-head { display: grid; grid-template-columns: auto 1fr; gap: clamp(20px, 4vw, 60px); align-items: baseline; margin-bottom: clamp(36px, 6vh, 64px); }
+  .sec-index {
+    font-family: var(--mono); font-size: 13px; color: var(--green);
+    border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; white-space: nowrap;
+  }
+  h2 {
+    margin: 0;
+    font-weight: 820; font-stretch: 112%;
+    text-transform: uppercase;
+    font-size: clamp(30px, 5.5vw, 64px);
+    line-height: 1.0; letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .sec-desc { margin: 18px 0 0; max-width: 560px; color: var(--ink-dim); }
+
+  /* split reveal (Wolverine-style) */
+  .split .w { display: inline-block; overflow: hidden; vertical-align: bottom; }
+  .split .w > i { display: inline-block; font-style: normal; transform: translateY(110%); transition: transform .8s cubic-bezier(.22,1,.36,1); }
+  .split.in .w > i { transform: translateY(0); }
+
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .8s cubic-bezier(.22,1,.36,1); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* ---------- stats ---------- */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  @media (max-width: 640px) { .stats { grid-template-columns: 1fr; } }
+  .stat { background: var(--bg-raise); padding: 34px 30px; }
+  .stat b { display: block; font-weight: 860; font-stretch: 115%; font-size: clamp(44px, 6vw, 72px); line-height: 1; color: var(--green); font-variant-numeric: tabular-nums; }
+  .stat span { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-dim); display: block; margin-top: 10px; }
+
+  /* ---------- módulos ---------- */
+  .mods { list-style: none; margin: 0; padding: 0; counter-reset: mod; }
   .mod {
     counter-increment: mod;
-    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
-    padding: 12px 16px;
-    display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: baseline;
+    display: grid; grid-template-columns: 60px 1fr auto; gap: clamp(14px, 3vw, 40px); align-items: center;
+    padding: 22px clamp(4px, 1vw, 12px);
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    transition: padding-left .35s cubic-bezier(.22,1,.36,1);
   }
+  .mods .mod:first-child { border-top: 1px solid var(--line); }
   .mod::before {
     content: counter(mod, decimal-leading-zero);
-    font-family: "Cascadia Code", Consolas, ui-monospace, monospace;
-    font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums;
+    font-family: var(--mono); font-size: 13px; color: var(--ink-faint);
+    transition: color .3s;
   }
-  .mod .t { font-weight: 600; font-size: 15.5px; }
-  .mod .d { display: block; font-weight: 400; font-size: 14px; color: var(--ink-soft); }
-  .mod a { color: var(--accent); }
-  .mod.demand { border-style: dashed; background: transparent; }
+  .mod::after {
+    content: ""; position: absolute; left: 0; bottom: -1px; height: 1px; width: 0;
+    background: var(--green); transition: width .5s cubic-bezier(.22,1,.36,1);
+  }
+  .mod:hover { padding-left: clamp(12px, 2vw, 24px); }
+  .mod:hover::before { color: var(--green); }
+  .mod:hover::after { width: 100%; }
+  .mod .t { font-weight: 700; font-size: clamp(17px, 2.2vw, 22px); text-transform: uppercase; letter-spacing: 0.01em; }
+  .mod .d { color: var(--ink-dim); font-size: 15px; max-width: 520px; }
+  .mod .d a { color: var(--green); }
+  @media (max-width: 720px) { .mod { grid-template-columns: 44px 1fr; } .mod .d { grid-column: 2; } }
+  .mod.demand .t { color: var(--ink-dim); }
 
-  .final {
-    margin-top: 56px; background: var(--surface);
-    border: 1px solid var(--accent); border-radius: 14px; padding: 26px;
+  /* ---------- projeto final ---------- */
+  .final-band {
+    background: var(--green); color: var(--bg);
+    padding: clamp(80px, 12vh, 150px) clamp(20px, 4vw, 48px);
   }
-  .final h2 { color: var(--accent); margin-bottom: 8px; }
-  .final p { margin: 0; }
-  .note {
-    margin-top: 40px; font-size: 14.5px; color: var(--ink-soft);
-    border-left: 3px solid var(--line); padding-left: 16px;
+  .final-inner { max-width: 1200px; margin: 0 auto; }
+  .final-band .label { color: var(--bg); opacity: .75; }
+  .final-band h2 { color: var(--bg); margin-top: 18px; max-width: 900px; }
+  .final-band p { max-width: 620px; font-size: 18px; margin: 26px 0 0; color: color-mix(in srgb, var(--bg) 82%, var(--green)); font-weight: 500; }
+  .final-band .cta { background: var(--bg); color: var(--green); margin-top: 38px; }
+  .final-band .cta:hover { background: #000; transform: translateY(-3px); }
+
+  footer {
+    padding: 48px clamp(20px, 4vw, 48px);
+    display: flex; flex-wrap: wrap; gap: 18px; justify-content: space-between; align-items: center;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono); font-size: 12.5px; color: var(--ink-dim);
   }
-  footer { margin-top: 72px; font-size: 13.5px; color: var(--ink-soft); border-top: 1px solid var(--line); padding-top: 18px; }
-  footer a { color: var(--accent); }
+  footer a { color: var(--green); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    h1 .line > span, .loaded h1 .line > span { animation: none; transform: none; }
+    .split .w > i { transition: none; transform: none; }
+    .reveal { transition: none; opacity: 1; transform: none; }
+    .marquee-track { animation: none; }
+    .term-body .cursor { animation: none; }
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <p class="eyebrow">Professor IA · curso open source</p>
-    <h1>Aprenda Claude Code &amp; arquitetura de IA com o próprio Claude</h1>
-    <p class="lede">Uma skill que transforma o Claude no seu professor particular — do zero absoluto ("o que é um LLM?") até construir seu próprio agente. Feito para quem nunca programou.</p>
-    <div class="cta-row">
-      <a class="cta" href="https://github.com/matmoretti/professor-ia#como-instalar">Instalar o professor</a>
-      <a class="cta ghost" href="aulas/aula-01.html">Ver a Aula 1 de exemplo</a>
-    </div>
-    <div class="facts">
-      <div class="fact"><b>3</b><span>trilhas de estudo</span></div>
-      <div class="fact"><b>20+</b><span>aulas mão na massa</span></div>
-      <div class="fact"><b>0</b><span>pré-requisitos</span></div>
-    </div>
-  </header>
 
-  <section>
-    <div class="trilha-head"><h2>Fundamentos</h2><span class="trilha-tag">Trilha 0</span></div>
-    <p class="trilha-desc">Pré-requisitos ensinados <em>sob demanda</em> — cada um entra na primeira vez que aparece nas outras trilhas, do básico ao avançado.</p>
-    <ol class="mods">
-      <li class="mod demand"><span class="t">Markdown <span class="d">Títulos e listas → frontmatter, tabelas, a "língua nativa" dos LLMs</span></span></li>
-      <li class="mod demand"><span class="t">Terminal, shell e CLI <span class="d">O balcão, o atendente e o cardápio: comandos, caminhos, e por que o Claude Code é um CLI</span></span></li>
-      <li class="mod demand"><span class="t">Formatos de dados <span class="d">JSON, YAML e como se descreve uma ferramenta pra um LLM</span></span></li>
-      <li class="mod demand"><span class="t">Git <span class="d">O "histórico de versões" do mundo do código</span></span></li>
-      <li class="mod demand"><span class="t">APIs e HTTP <span class="d">Como programas conversam entre si pela internet</span></span></li>
-      <li class="mod demand"><span class="t">Arquivos e sistema <span class="d">Pastas, arquivos ocultos, extensões e executáveis</span></span></li>
-    </ol>
-  </section>
-
-  <section>
-    <div class="trilha-head"><h2>Claude Code na prática</h2><span class="trilha-tag">Trilha A</span></div>
-    <p class="trilha-desc">O laboratório: cada conceito vira algo que você faz de verdade na sua máquina.</p>
-    <ol class="mods">
-      <li class="mod"><span class="t">Fundamentos do Claude Code <span class="d">O ciclo do agente, permissões, primeiros comandos — <a href="aulas/aula-01.html">veja a aula de exemplo</a></span></span></li>
-      <li class="mod"><span class="t">Contexto e memória <span class="d">A "mesa de trabalho" do LLM; CLAUDE.md; memória entre sessões</span></span></li>
-      <li class="mod"><span class="t">Ferramentas nativas <span class="d">As "mãos": ler, escrever, buscar, executar</span></span></li>
-      <li class="mod"><span class="t">Skills e comandos <span class="d">Transformar o agente em especialista (como esta skill!)</span></span></li>
-      <li class="mod"><span class="t">Hooks e configurações <span class="d">Regras automáticas e permissões sob medida</span></span></li>
-      <li class="mod"><span class="t">Subagentes <span class="d">O mestre de obras e seus ajudantes</span></span></li>
-      <li class="mod"><span class="t">MCP <span class="d">Plugar o agente em outros serviços (Figma, Slack, Gmail…)</span></span></li>
-      <li class="mod"><span class="t">Workflows e orquestração <span class="d">Vários agentes trabalhando em conjunto</span></span></li>
-      <li class="mod"><span class="t">Git + Claude Code <span class="d">Versionar, revisar e colaborar como os profissionais</span></span></li>
-      <li class="mod"><span class="t">Automação <span class="d">Agentes que trabalham sozinhos, em horários agendados</span></span></li>
-    </ol>
-  </section>
-
-  <section>
-    <div class="trilha-head"><h2>Arquitetura de IA</h2><span class="trilha-tag">Trilha B</span></div>
-    <p class="trilha-desc">A teoria por trás: entender o que acontece dentro da máquina — sem matemática pesada.</p>
-    <ol class="mods">
-      <li class="mod"><span class="t">Como um LLM funciona <span class="d">O autocompletar gigante: tokens, previsão, temperatura</span></span></li>
-      <li class="mod"><span class="t">Anatomia de um agente <span class="d">Cérebro + mãos + objetivo; o ciclo pensa→age→observa</span></span></li>
-      <li class="mod"><span class="t">Engenharia de contexto <span class="d">System prompts e a arte de instruir um LLM</span></span></li>
-      <li class="mod"><span class="t">RAG <span class="d">Como dar uma "biblioteca" pesquisável ao modelo</span></span></li>
-      <li class="mod"><span class="t">Design de ferramentas <span class="d">Como desenhar boas "mãos" — puro design, aliás</span></span></li>
-      <li class="mod"><span class="t">Arquiteturas multiagente <span class="d">Orquestradores, painéis de juízes, verificação cruzada</span></span></li>
-      <li class="mod"><span class="t">Avaliação (evals) <span class="d">Como saber se a IA está boa — "parece bom" não basta</span></span></li>
-      <li class="mod"><span class="t">Segurança e confiabilidade <span class="d">Prompt injection, permissões, o humano no circuito</span></span></li>
-      <li class="mod"><span class="t">Custo e latência <span class="d">Escolher o modelo certo pra cada tarefa</span></span></li>
-      <li class="mod"><span class="t">Projeto final <span class="d">Ver abaixo 👇</span></span></li>
-    </ol>
-  </section>
-
-  <div class="final">
-    <h2>🏁 Projeto final: o seu agente</h2>
-    <p>Ao fim do curso, você desenha e constrói um <strong>agente completo</strong>, escolhido conforme a sua profissão — um designer pode criar um agente que revisa os textos de um projeto conforme o guide da marca; um analista, um agente que audita planilhas; um advogado, um revisor de contratos. O professor adapta o projeto a você.</p>
+<nav>
+  <a class="brand" href="#"><em>~/</em>professor-ia</a>
+  <div class="links">
+    <a href="#curriculo" class="hide-sm">Currículo</a>
+    <a href="aulas/aula-01.html" class="hide-sm">Aula demo</a>
+    <a href="https://github.com/matmoretti/professor-ia">GitHub ↗</a>
   </div>
+</nav>
 
-  <p class="note">As trilhas são intercaladas (uma aula prática, uma teórica), os fundamentos entram quando o assunto pede, e a ordem se adapta à curiosidade de cada aluno. O progresso fica salvo entre sessões — o professor sempre lembra de onde vocês pararam.</p>
+<header class="hero">
+  <canvas id="particles" aria-hidden="true"></canvas>
+  <p class="label">Curso open source · grátis · em português</p>
+  <h1 aria-label="Aprenda Claude Code com o próprio Claude.">
+    <span class="line" aria-hidden="true"><span>Aprenda</span></span>
+    <span class="line" aria-hidden="true"><span>Claude Code</span></span>
+    <span class="line" aria-hidden="true"><span>com o <em class="accent" style="font-style:normal">próprio Claude</em>.</span></span>
+  </h1>
+  <div class="hero-foot">
+    <div>
+      <p class="hero-sub">Uma skill que transforma o Claude no seu <strong>professor particular</strong> de Claude Code e arquitetura de IA. Do zero absoluto — <strong>feito para quem nunca programou.</strong></p>
+      <div class="cta-row" style="margin-top: 30px">
+        <a class="cta" href="https://github.com/matmoretti/professor-ia#como-instalar">Instalar o professor</a>
+        <a class="cta ghost" href="aulas/aula-01.html">Ver a aula 1 →</a>
+      </div>
+    </div>
+    <div class="term-card" aria-hidden="true">
+      <div class="term-bar"><i></i><i></i><i></i></div>
+      <div class="term-body" id="termDemo"></div>
+    </div>
+  </div>
+</header>
 
-  <footer>Curso open source sob licença MIT · <a href="https://github.com/matmoretti/professor-ia">github.com/matmoretti/professor-ia</a> · nascido de uma aula real entre o Claude e um product designer que nunca tinha programado 🎓</footer>
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track" id="marquee">
+    <span>LLM</span><span>Agente</span><span>Terminal</span><span>Skill</span><span>Subagentes</span><span>MCP</span><span>Contexto</span><span>RAG</span><span>Tokens</span><span>Harness</span><span>Prompt</span><span>Evals</span>
+  </div>
 </div>
+
+<section>
+  <div class="stats">
+    <div class="stat reveal"><b data-count="3">0</b><span>trilhas de estudo</span></div>
+    <div class="stat reveal" style="transition-delay:.1s"><b data-count="20" data-suffix="+">0</b><span>aulas mão na massa</span></div>
+    <div class="stat reveal" style="transition-delay:.2s"><b data-count="0">0</b><span>pré-requisitos</span></div>
+  </div>
+</section>
+
+<section id="curriculo" style="padding-top: 0">
+  <div class="sec-head">
+    <span class="sec-index">Trilha 0</span>
+    <div>
+      <h2 class="split">Fundamentos</h2>
+      <p class="sec-desc reveal">Pré-requisitos ensinados <em>sob demanda</em> — cada um entra na primeira vez que aparece nas outras trilhas, do básico ao avançado.</p>
+    </div>
+  </div>
+  <ol class="mods">
+    <li class="mod demand reveal"><span class="t">Markdown</span><span class="d">Títulos e listas → frontmatter, tabelas, a "língua nativa" dos LLMs</span></li>
+    <li class="mod demand reveal"><span class="t">Terminal, shell e CLI</span><span class="d">O balcão, o atendente e o cardápio — e por que o Claude Code é um CLI</span></li>
+    <li class="mod demand reveal"><span class="t">Formatos de dados</span><span class="d">JSON, YAML e como se descreve uma ferramenta pra um LLM</span></li>
+    <li class="mod demand reveal"><span class="t">Git</span><span class="d">O "histórico de versões" do mundo do código</span></li>
+    <li class="mod demand reveal"><span class="t">APIs e HTTP</span><span class="d">Como programas conversam entre si pela internet</span></li>
+    <li class="mod demand reveal"><span class="t">Arquivos e sistema</span><span class="d">Pastas, arquivos ocultos, extensões e executáveis</span></li>
+  </ol>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-index">Trilha A</span>
+    <div>
+      <h2 class="split">Claude Code na prática</h2>
+      <p class="sec-desc reveal">O laboratório: cada conceito vira algo que você faz de verdade na sua máquina.</p>
+    </div>
+  </div>
+  <ol class="mods">
+    <li class="mod reveal"><span class="t">Fundamentos do Claude Code</span><span class="d">O ciclo do agente, permissões, primeiros comandos — <a href="aulas/aula-01.html">veja a aula de exemplo</a></span></li>
+    <li class="mod reveal"><span class="t">Contexto e memória</span><span class="d">A "mesa de trabalho" do LLM; CLAUDE.md; memória entre sessões</span></li>
+    <li class="mod reveal"><span class="t">Ferramentas nativas</span><span class="d">As "mãos": ler, escrever, buscar, executar</span></li>
+    <li class="mod reveal"><span class="t">Skills e comandos</span><span class="d">Transformar o agente em especialista (como esta skill!)</span></li>
+    <li class="mod reveal"><span class="t">Hooks e configurações</span><span class="d">Regras automáticas e permissões sob medida</span></li>
+    <li class="mod reveal"><span class="t">Subagentes</span><span class="d">O mestre de obras e seus ajudantes</span></li>
+    <li class="mod reveal"><span class="t">MCP</span><span class="d">Plugar o agente em outros serviços — Figma, Slack, Gmail…</span></li>
+    <li class="mod reveal"><span class="t">Workflows e orquestração</span><span class="d">Vários agentes trabalhando em conjunto</span></li>
+    <li class="mod reveal"><span class="t">Git + Claude Code</span><span class="d">Versionar, revisar e colaborar como os profissionais</span></li>
+    <li class="mod reveal"><span class="t">Automação</span><span class="d">Agentes que trabalham sozinhos, em horários agendados</span></li>
+  </ol>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-index">Trilha B</span>
+    <div>
+      <h2 class="split">Arquitetura de IA</h2>
+      <p class="sec-desc reveal">A teoria por trás: entender o que acontece dentro da máquina — sem matemática pesada.</p>
+    </div>
+  </div>
+  <ol class="mods">
+    <li class="mod reveal"><span class="t">Como um LLM funciona</span><span class="d">O autocompletar gigante: tokens, previsão, temperatura</span></li>
+    <li class="mod reveal"><span class="t">Anatomia de um agente</span><span class="d">Cérebro + mãos + objetivo; o ciclo pensa → age → observa</span></li>
+    <li class="mod reveal"><span class="t">Engenharia de contexto</span><span class="d">System prompts e a arte de instruir um LLM</span></li>
+    <li class="mod reveal"><span class="t">RAG</span><span class="d">Como dar uma "biblioteca" pesquisável ao modelo</span></li>
+    <li class="mod reveal"><span class="t">Design de ferramentas</span><span class="d">Como desenhar boas "mãos" — puro design, aliás</span></li>
+    <li class="mod reveal"><span class="t">Arquiteturas multiagente</span><span class="d">Orquestradores, painéis de juízes, verificação cruzada</span></li>
+    <li class="mod reveal"><span class="t">Avaliação (evals)</span><span class="d">Como saber se a IA está boa — "parece bom" não basta</span></li>
+    <li class="mod reveal"><span class="t">Segurança e confiabilidade</span><span class="d">Prompt injection, permissões, o humano no circuito</span></li>
+    <li class="mod reveal"><span class="t">Custo e latência</span><span class="d">Escolher o modelo certo pra cada tarefa</span></li>
+    <li class="mod reveal"><span class="t">Projeto final</span><span class="d">Ver abaixo ↓</span></li>
+  </ol>
+</section>
+
+<div class="final-band">
+  <div class="final-inner">
+    <p class="label">Projeto final</p>
+    <h2 class="split">Você sai do curso com um agente construído por você.</h2>
+    <p class="reveal">O projeto é adaptado à sua profissão: um designer constrói um agente que revisa textos conforme o guide da marca; um analista, um auditor de planilhas; um advogado, um revisor de contratos. O professor desenha o desafio com você.</p>
+    <a class="cta reveal" href="https://github.com/matmoretti/professor-ia#como-instalar">Começar agora</a>
+  </div>
+</div>
+
+<footer>
+  <span>© 2026 · licença MIT · <a href="https://github.com/matmoretti/professor-ia">github.com/matmoretti/professor-ia</a></span>
+  <span>nascido de uma aula real entre o Claude e um product designer que nunca tinha programado 🎓</span>
+</footer>
+
+<script>
+(function () {
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // hero: dispara a subida das linhas do título
+  requestAnimationFrame(function () { document.body.classList.add("loaded"); });
+
+  // split reveal: embrulha cada palavra dos h2 (estilo SplitText)
+  document.querySelectorAll(".split").forEach(function (el) {
+    var words = el.textContent.trim().split(/\s+/);
+    el.setAttribute("aria-label", el.textContent.trim());
+    el.innerHTML = words.map(function (w) {
+      return '<span class="w" aria-hidden="true"><i>' + w + '</i></span>';
+    }).join(" ");
+    Array.prototype.forEach.call(el.querySelectorAll(".w > i"), function (i, idx) {
+      i.style.transitionDelay = (idx * 60) + "ms";
+    });
+  });
+
+  // observer: revela .split e .reveal ao entrar na tela
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.18 });
+  document.querySelectorAll(".split, .reveal").forEach(function (el) { io.observe(el); });
+
+  // contadores
+  var cio = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      cio.unobserve(e.target);
+      var el = e.target, target = +el.dataset.count, suffix = el.dataset.suffix || "";
+      if (reduced || target === 0) { el.textContent = target + suffix; return; }
+      var t0 = performance.now(), dur = 1200;
+      (function tick(now) {
+        var p = Math.min((now - t0) / dur, 1);
+        el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))) + (p === 1 ? suffix : "");
+        if (p < 1) requestAnimationFrame(tick);
+      })(t0);
+    });
+  }, { threshold: 0.6 });
+  document.querySelectorAll("[data-count]").forEach(function (el) { cio.observe(el); });
+
+  // marquee: duplica o conteúdo pra loop contínuo
+  var mq = document.getElementById("marquee");
+  mq.innerHTML += mq.innerHTML;
+
+  // terminal do hero: conversa que se digita sozinha
+  var term = document.getElementById("termDemo");
+  var script = [
+    { cls: "u", text: "> me explica o que é um LLM?", pause: 700 },
+    { cls: "", text: "Claro! Pensa num autocompletar gigante…", pause: 900 },
+    { cls: "u", text: "> cria um arquivo de exemplo pra eu ver", pause: 700 },
+    { cls: "g", text: "⏺ Write(exemplo.txt) ✓", pause: 900 },
+    { cls: "", text: "Pronto! Vai lá conferir — aula é isso. 🎓", pause: 2600 }
+  ];
+  function typeLoop() {
+    term.innerHTML = "";
+    var li = 0;
+    function nextLine() {
+      if (li >= script.length) { setTimeout(typeLoop, 400); return; }
+      var line = script[li++];
+      var el = document.createElement("div");
+      if (line.cls) el.className = line.cls;
+      term.appendChild(el);
+      var cur = document.createElement("span");
+      cur.className = "cursor";
+      el.appendChild(cur);
+      var ci = 0;
+      (function typeChar() {
+        if (ci < line.text.length) {
+          cur.insertAdjacentText("beforebegin", line.text.charAt(ci++));
+          setTimeout(typeChar, 26 + Math.random() * 34);
+        } else {
+          setTimeout(function () { cur.remove(); nextLine(); }, line.pause);
+        }
+      })();
+    }
+    nextLine();
+  }
+  if (reduced) {
+    term.innerHTML = script.map(function (l) {
+      return '<div class="' + l.cls + '">' + l.text + "</div>";
+    }).join("");
+  } else { typeLoop(); }
+
+  // partículas: glifos de terminal flutuando
+  var canvas = document.getElementById("particles");
+  if (!reduced && canvas) {
+    var ctx = canvas.getContext("2d");
+    var glyphs = "{}[]<>/$#*;:=+".split("");
+    var ps = [];
+    function resize() {
+      canvas.width = canvas.offsetWidth * devicePixelRatio;
+      canvas.height = canvas.offsetHeight * devicePixelRatio;
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    }
+    resize();
+    addEventListener("resize", resize);
+    for (var i = 0; i < 34; i++) {
+      ps.push({
+        x: Math.random(), y: Math.random(),
+        vy: 0.00012 + Math.random() * 0.00028,
+        size: 10 + Math.random() * 8,
+        alpha: 0.05 + Math.random() * 0.12,
+        g: glyphs[Math.floor(Math.random() * glyphs.length)]
+      });
+    }
+    (function draw() {
+      var w = canvas.offsetWidth, h = canvas.offsetHeight;
+      ctx.clearRect(0, 0, w, h);
+      ps.forEach(function (p) {
+        p.y -= p.vy;
+        if (p.y < -0.05) { p.y = 1.05; p.x = Math.random(); }
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = "#4ADE94";
+        ctx.font = p.size + 'px "JetBrains Mono", monospace';
+        ctx.fillText(p.g, p.x * w, p.y * h);
+      });
+      requestAnimationFrame(draw);
+    })();
+  }
+})();
+</script>
 </body>
 </html>
